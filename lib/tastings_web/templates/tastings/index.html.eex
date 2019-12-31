@@ -1,0 +1,10 @@
+<h1>Tastings</h1>
+
+<section class="row">
+  <article class="column">
+    <p>Host</p>
+  </article>
+  <article class="column">
+    <p>Join</p>
+  </article>
+</section>
