@@ -1,0 +1,18 @@
+<h1>Show Tasting</h1>
+
+<ul>
+
+  <li>
+    <strong>Name:</strong>
+    <%= @tasting.name %>
+  </li>
+
+  <li>
+    <strong>Join code:</strong>
+    <%= @tasting.join_code %>
+  </li>
+
+</ul>
+
+<span><%= link "Edit", to: Routes.tasting_path(@conn, :edit, @tasting) %></span>
+<span><%= link "Back", to: Routes.tasting_path(@conn, :index) %></span>

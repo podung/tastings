@@ -16,7 +16,8 @@ defmodule TastingsWeb.Router do
   scope "/", TastingsWeb do
     pipe_through :browser
 
-    get "/", TastingsController, :index
+    get "/", PageController, :index
+    resources "/tastings", TastingController
   end
 
   # Other scopes may use custom stacks.

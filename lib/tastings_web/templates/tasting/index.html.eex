@@ -1,0 +1,28 @@
+<h1>Listing Tastings</h1>
+
+<table>
+  <thead>
+    <tr>
+      <th>Name</th>
+      <th>Join code</th>
+
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+<%= for tasting <- @tastings do %>
+    <tr>
+      <td><%= tasting.name %></td>
+      <td><%= tasting.join_code %></td>
+
+      <td>
+        <span><%= link "Show", to: Routes.tasting_path(@conn, :show, tasting) %></span>
+        <span><%= link "Edit", to: Routes.tasting_path(@conn, :edit, tasting) %></span>
+        <span><%= link "Delete", to: Routes.tasting_path(@conn, :delete, tasting), method: :delete, data: [confirm: "Are you sure?"] %></span>
+      </td>
+    </tr>
+<% end %>
+  </tbody>
+</table>
+
+<span><%= link "New Tasting", to: Routes.tasting_path(@conn, :new) %></span>
