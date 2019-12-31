@@ -15,7 +15,10 @@ config :tastings, TastingsWeb.Endpoint,
   url: [host: "localhost"],
   secret_key_base: "p9Jjmqq+NCkfcC1FnJ5kX7P6F8ipk1AB7h9JpFuebUJaFf3QduVz7H6ZICKoLffr",
   render_errors: [view: TastingsWeb.ErrorView, accepts: ~w(html json)],
-  pubsub: [name: Tastings.PubSub, adapter: Phoenix.PubSub.PG2]
+  pubsub: [name: Tastings.PubSub, adapter: Phoenix.PubSub.PG2],
+  live_view: [
+    signing_salt: "3qMxYdFgVFgmjRj8knzyVfHsxENwF2Ei"
+  ]
 
 # Configures Elixir's Logger
 config :logger, :console,

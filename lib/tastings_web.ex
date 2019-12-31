@@ -24,6 +24,8 @@ defmodule TastingsWeb do
       import Plug.Conn
       import TastingsWeb.Gettext
       alias TastingsWeb.Router.Helpers, as: Routes
+
+      import Phoenix.LiveView.Controller
     end
   end
 
@@ -42,6 +44,11 @@ defmodule TastingsWeb do
       import TastingsWeb.ErrorHelpers
       import TastingsWeb.Gettext
       alias TastingsWeb.Router.Helpers, as: Routes
+
+
+      import Phoenix.LiveView,
+        only: [live_render: 2, live_render: 3, live_link: 1, live_link: 2,
+               live_component: 2, live_component: 3, live_component: 4]
     end
   end
 
@@ -50,6 +57,8 @@ defmodule TastingsWeb do
       use Phoenix.Router
       import Plug.Conn
       import Phoenix.Controller
+
+      import Phoenix.LiveView.Router
     end
   end
 
