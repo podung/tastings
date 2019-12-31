@@ -19,6 +19,8 @@ defmodule TastingsWeb.Router do
 
     get "/", LandingController, :index
     resources "/tastings", TastingController
+    get "/join", LiveEventsController, :index
+    post "/join", LiveEventsController, :join
   end
 
   # Other scopes may use custom stacks.

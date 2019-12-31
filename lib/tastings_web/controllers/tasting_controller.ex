@@ -3,6 +3,7 @@ defmodule TastingsWeb.TastingController do
 
   alias Tastings.Events
   alias Tastings.Events.Tasting
+  alias Tastings.TastingLiveView
 
   def index(conn, _params) do
     tastings = Events.list_tastings()

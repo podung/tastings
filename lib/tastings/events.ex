@@ -101,4 +101,6 @@ defmodule Tastings.Events do
   def change_tasting(%Tasting{} = tasting) do
     Tasting.changeset(tasting, %{})
   end
+
+  def get_by_code(join_code), do: Repo.get_by!(Tasting, join_code: join_code)
 end

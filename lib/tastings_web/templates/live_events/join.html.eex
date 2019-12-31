@@ -1,0 +1,17 @@
+<h1>Join Event</h1>
+
+<%= form_for @conn, Routes.live_events_path(@conn, :join), fn f -> %>
+  <%= label f, :username %>
+  <%= text_input f, :username %>
+  <%= error_tag f, :username %>
+
+  <%= label f, :join_code %>
+  <%= text_input f, :join_code %>
+  <%= error_tag f, :join_code %>
+
+  <div>
+    <%= submit "Join" %>
+  </div>
+<% end %>
+
+<span><%= link "Back", to: Routes.landing_path(@conn, :index) %></span>
