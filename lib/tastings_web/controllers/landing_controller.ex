@@ -1,4 +1,4 @@
-defmodule TastingsWeb.PageController do
+defmodule TastingsWeb.LandingController do
   use TastingsWeb, :controller
 
   def index(conn, _params) do
