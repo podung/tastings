@@ -22,5 +22,5 @@ defmodule TastingsWeb.LiveEventsController do
     |> put_session(:tasting, tasting)
     |> put_session(:current_user, %{ username: username })
     |> redirect(to: Routes.live_path(conn, TastingsWeb.TastingLiveView))
-
+  end
 end
