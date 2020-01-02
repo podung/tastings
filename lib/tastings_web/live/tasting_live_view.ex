@@ -1,4 +1,4 @@
-defmodule Tastings.TastingLiveView do
+defmodule TastingsWeb.TastingLiveView do
 	use Phoenix.LiveView
 
 	def render(assigns) do

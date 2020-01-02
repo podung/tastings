@@ -18,11 +18,9 @@ defmodule TastingsWeb.LiveEventsController do
 
     tasting = Tastings.Events.get_by_code(join_code)
 
-    Phoenix.LiveView.Controller.live_render(
-            conn,
-            TastingLiveView,
-            session: %{tasting: tasting, current_user: %{ username: username } }
-          )
+    conn
+    |> put_session(:tasting, tasting)
+    |> put_session(:current_user, %{ username: username })
+    |> redirect(to: Routes.live_path(conn, TastingsWeb.TastingLiveView))
 
-  end
 end

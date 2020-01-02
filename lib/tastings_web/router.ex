@@ -21,6 +21,10 @@ defmodule TastingsWeb.Router do
     resources "/tastings", TastingController
     get "/join", LiveEventsController, :index
     post "/join", LiveEventsController, :join
+
+
+    # TODO: get the id into the path somehow
+    live "/event/live", TastingLiveView, session: [:tasting, :current_user]
   end
 
   # Other scopes may use custom stacks.
