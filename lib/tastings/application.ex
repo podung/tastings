@@ -11,7 +11,8 @@ defmodule Tastings.Application do
       # Start the Ecto repository
       Tastings.Repo,
       # Start the endpoint when the application starts
-      TastingsWeb.Endpoint
+      TastingsWeb.Endpoint,
+      TastingsWeb.Presence
       # Starts a worker by calling: Tastings.Worker.start_link(arg)
       # {Tastings.Worker, arg},
     ]

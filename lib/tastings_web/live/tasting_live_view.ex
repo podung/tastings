@@ -1,7 +1,11 @@
 defmodule TastingsWeb.TastingLiveView do
-	use Phoenix.LiveView
+  use Phoenix.LiveView
+  alias TastingsWeb.Presence
 
-	def render(assigns) do
+  defp topic(tasting_id), do: "tasting:#{tasting_id}"
+
+  def render(assigns) do
+
     unless assigns[:bottle] do
       ~L"""
         <p>Do you have a bottle to share?</p>
@@ -15,18 +19,29 @@ defmodule TastingsWeb.TastingLiveView do
 
   def mount(%{tasting: tasting, current_user: current_user}, socket) do
 
-    #Presence.track_presence(
-      #self(),
-      #topic(chat.id),
-      #current_user.id,
-      #default_user_presence_payload(current_user)
-    #)
+    if socket.connected? do
+      Presence.track_presence(
+        self(),
+        topic(tasting.id),
+        current_user.username, # TODO: change this to user id
+        current_user # TODO: just map things I need here
+      )
+    end
 
+    TastingsWeb.Endpoint.subscribe(topic(tasting.id))
 
     {:ok,
      assign(socket,
        tasting: tasting,
        current_user: current_user,
+       users: Presence.list_presences(topic(tasting.id))
+     )}
+  end
+
+  def handle_info(%{event: "presence_diff"}, socket = %{assigns: %{tasting: tasting}}) do
+    {:noreply,
+     assign(socket,
+       users: Presence.list_presences(topic(tasting.id))
      )}
   end
 
