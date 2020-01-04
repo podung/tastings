@@ -2,31 +2,27 @@ defmodule TastingsWeb.TastingLiveView do
   use Phoenix.LiveView
   alias TastingsWeb.Presence
 
+  alias TastingsWeb.Router.Helpers, as: Routes
+
   defp topic(tasting_id), do: "tasting:#{tasting_id}"
 
+  # TODO: can I redirect from the render - to change the path?
   def render(assigns) do
-
-    unless assigns[:bottle] do
-      ~L"""
-        <p>Do you have a bottle to share?</p>
-        <button phx-click="enter_bottle" phx-value-bottle=true>Yes</button>
-        <button phx-click="enter_bottle" phx-value-bottle=false>No, Im a free loader</button>
-      """
-    else
-      TastingsWeb.LiveEventsView.render("show.html", assigns)
+    page = case assigns.page do
+      :bottle -> live_component(assigns.socket,
+                  TastingsWeb.Live.Components.Bottle,
+                  id: :bottle,
+                  bottle: @bottle)
+      _ -> TastingsWeb.LiveEventsView.render("show.html", assigns)
     end
+
+    ~L"""
+      <%= page %>
+    """
   end
 
-  def mount(%{tasting: tasting, current_user: current_user}, socket) do
-
-    if socket.connected? do
-      Presence.track_presence(
-        self(),
-        topic(tasting.id),
-        current_user.username, # TODO: change this to user id
-        current_user # TODO: just map things I need here
-      )
-    end
+  def mount(%{tasting: tasting, current_user: current_user} = session, socket) do
+    if socket.connected?, do: track_presence(session)
 
     TastingsWeb.Endpoint.subscribe(topic(tasting.id))
 
@@ -34,7 +30,9 @@ defmodule TastingsWeb.TastingLiveView do
      assign(socket,
        tasting: tasting,
        current_user: current_user,
-       users: Presence.list_presences(topic(tasting.id))
+       users: Presence.list_presences(topic(tasting.id)),
+       page: :bottle,
+       bottle: nil
      )}
   end
 
@@ -45,24 +43,42 @@ defmodule TastingsWeb.TastingLiveView do
      )}
   end
 
-	def handle_params(%{ "page": "bottle" }, _uri, socket) do
-		#TastingsWeb.LiveEventsView.render("bottle_new.html", assigns)
-		{ :noreply, socket }
-	end
+  def handle_params(%{ "id": "bottle" }, _uri, socket) do
+    # TODO: figure out why I never end up in here.....
+    IO.puts "AM I IN HERE????"
 
-	def handle_params(params, _uri, socket), do:  {:noreply, socket}
+    { :noreply, assign(socket, :page, :bottle) }
+  end
 
-  def handle_event("enter_bottle", params, socket) do
+  def handle_params(%{ "id": "foo" }, _uri, socket) do
+    IO.puts "FOOOOOOOO - AM I IN HERE????"
 
-		hasBottle = String.to_existing_atom(params["bottle"])
+    { :noreply, assign(socket, :page, :bottle) }
+  end
 
-    if hasBottle do
-			IO.puts " got the bottle"
-      { :noreply, live_redirect(socket, to: TastingsWeb.Router.Helpers.live_path(socket, TastingsWeb.TastingLiveView, page: "bottle")) }
-    else
+  def handle_params(params, _uri, socket) do
+    # TODO: figure out why I ALWAYS end up in here.....
+    IO.puts "What about in this thing???"
+IO.inspect(params)
 
-			IO.puts "IM IN HERE - no bottle"
-      { :noreply, assign(socket, :bottle, :skipped) }
-    end
+    {:noreply, socket}
+    #{ :noreply, live_redirect(socket, to: TastingsWeb.Router.Helpers.live_path(socket, TastingsWeb.TastingLiveView) ) }
+  end
+
+  def handle_info({ :route, page = page }, socket) do
+    socket = socket
+             |> assign(:page, page)
+             |> live_redirect(to: Routes.live_path(socket, TastingsWeb.TastingLiveView, page))
+
+    { :noreply, socket }
+  end
+
+  defp track_presence(%{ tasting: tasting, current_user: current_user }) do
+    Presence.track_presence(
+      self(),
+      topic(tasting.id),
+      current_user.username, # TODO: change this to user id
+      current_user # TODO: just map things I need here
+    )
   end
 end
