@@ -1,78 +1,35 @@
 defmodule TastingsWeb.Live.Components.Bottle do
   use Phoenix.LiveComponent
 
-	alias Tastings.Events
-	alias Tastings.Bottle
-	alias TastingsWeb.Router.Helpers, as: Routes
-
-  defp topic(tasting_id), do: "tasting:#{tasting_id}"
+  alias TastingsWeb.Router.Helpers, as: Routes
 
   def render(assigns) do
+    #TODO: handle out of bounds condition - fetch! won't blow up for negative (will just loop around)
+    adjusted_index = assigns.index - 1;
+    bottle = Enum.fetch!(assigns.tasting.bottles, adjusted_index)
+
     ~L"""
-      <%= unless @has_bottle do %>
-        <p>Do you have a bottle to share?</p>
-        <button phx-click="has_bottle" phx-value-has-bottle=true>Yes</button>
-        <button phx-click="has_bottle" phx-value-has-bottle=false>No, Im a free loader</button>
-      <% else %>
-        <%= TastingsWeb.LiveEventsView.render("bottle/_new.html", assigns) %>
-      <% end %>
+      <h2><%= bottle.name %></h2>
+      <small><%= "(Bottle #{ assigns.index } of #{ assigns.bottle_count })" %></small>
+      <p>some</p>
+      <p>info</p>
+      <p>here</p>
+
+      <%= if assigns.index > 1, do: live_link("<", to: Routes.live_path(@socket, TastingsWeb.TastingLiveView, :bottle, assigns.index - 1)) %>
+      <%= if assigns.index < assigns.bottle_count, do: live_link(">", to: Routes.live_path(@socket, TastingsWeb.TastingLiveView, :bottle, assigns.index + 1)) %>
     """
   end
 
   def mount(socket)  do
-    {:ok,
-      socket
-      |> assign(:has_bottle, false)
-    }
+    {:ok, socket}
   end
 
   def update(assigns, socket) do
     {:ok,
       socket
-      |> assign(:changeset, Events.change_bottle(assigns.bottle))
-      |> assign(:tasting_id, assigns.tasting_id)
+      |> assign(:tasting, assigns.tasting)
+      |> assign(:index, assigns.index)
+      |> assign(:bottle_count, assigns.bottle_count)
     }
-  end
-
-  def handle_event("has_bottle", params, socket) do
-    hasBottle = String.to_existing_atom(params["has-bottle"])
-
-    if hasBottle do
-      { :noreply, assign(socket, :has_bottle, true) }
-    else
-      send(socket.root_pid, { :route, "" })
-      { :noreply, assign(socket, :has_bottle, false) }
-    end
-  end
-
-  def handle_event("validate", %{ "bottle" => params }, socket) do
-		changeset =
-			%Bottle{}
-      |> Map.put(:tasting_id, socket.assigns.tasting_id)
-			|> Events.change_bottle(params)
-			|> Map.put(:action, :insert)
-
-    {:noreply, assign(socket, changeset: changeset)}
-  end
-
-  def handle_event("save", %{ "bottle" => params }, socket) do
-    params = Map.put(params, "tasting_id", socket.assigns.tasting_id)
-
-		case Events.create_bottle(params) do
-      {:ok, bottle} ->
-        socket.assigns.tasting_id
-        |> topic
-        |> TastingsWeb.Endpoint.broadcast("bottle:added", %{ bottle: bottle })
-
-        send(socket.root_pid, { :route, "" })
-
-        { :noreply, socket }
-
-      {:error, %Ecto.Changeset{} = changeset} ->
-        # TODO: do these errors show up correctly?  If there's a general error I might miss it
-        # Do a flash?
-        # find that documentation about error_tag?
-        {:noreply, assign(socket, changeset: changeset)}
-		end
   end
 end

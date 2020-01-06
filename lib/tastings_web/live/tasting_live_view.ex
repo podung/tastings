@@ -10,11 +10,17 @@ defmodule TastingsWeb.TastingLiveView do
   # TODO: can I redirect from the render - to change the path?
   def render(assigns) do
     page = case assigns.page do
-      :bottle -> live_component(assigns.socket,
-                  TastingsWeb.Live.Components.Bottle,
-                  id: :bottle,
-                  bottle: assigns.bottle,
-                  tasting_id: assigns.tasting.id)
+      :add_bottle -> live_component(assigns.socket,
+                       TastingsWeb.Live.Components.AddBottle,
+                       id: :add_bottle, bottle: assigns.bottle,
+                       tasting_id: assigns.tasting.id)
+      :bottle -> live_component(
+                   assigns.socket,
+                   TastingsWeb.Live.Components.Bottle,
+                   id: :bottle,
+                   tasting: assigns.tasting,
+                   index: assigns.page_params[:index],
+                   bottle_count: length(assigns.tasting.bottles))
       _ -> TastingsWeb.LiveEventsView.render("show.html", assigns)
     end
 
@@ -33,12 +39,15 @@ defmodule TastingsWeb.TastingLiveView do
               |> Tastings.Events.load_bottles_for_tasting
 
     {:ok,
-      assign(socket,
-       current_user: current_user,
-       tasting: tasting,
-       users: Presence.list_presences(topic(tasting_id)),
-       page: :bottle,
-       bottle: %Bottle{ tasting_id: tasting_id } )}
+      socket
+      |> assign(
+           current_user: current_user,
+           tasting: tasting,
+           users: Presence.list_presences(topic(tasting_id)),
+           page: :add_bottle,
+           bottle: %Bottle{ tasting_id: tasting_id },
+           bottle_count: length(tasting.bottles)
+      )}
   end
 
   def handle_info(%{event: "presence_diff"}, socket = %{assigns: %{tasting: tasting}}) do
@@ -48,33 +57,30 @@ defmodule TastingsWeb.TastingLiveView do
      )}
   end
 
-  def handle_params(%{ "id": "bottle" }, _uri, socket) do
+  def handle_params(%{ "id" => "bottle", "bottle_index" => index } = params, uri, socket) do
     # TODO: figure out why I never end up in here.....
-    IO.puts "AM I IN HERE????"
 
-    { :noreply, assign(socket, :page, :bottle) }
-  end
+    IO.puts "((((((((((((((((((("
+    IO.inspect params
+    IO.puts "((((((((((((((((((("
 
-  def handle_params(%{ "id": "foo" }, _uri, socket) do
-    IO.puts "FOOOOOOOO - AM I IN HERE????"
-
-    { :noreply, assign(socket, :page, :bottle) }
+    # TODO: assign bottle and index, but do not redirect
+    { :noreply,
+      socket
+      |> assign(:page, :bottle)
+      |> assign(:page_params, %{ index: String.to_integer(index) })
+    }
   end
 
   def handle_params(params, _uri, socket) do
-    # TODO: figure out why I ALWAYS end up in here.....
-    # HOW COME I CAN'T INTERCEPT IT? - with the two clauses above?
-    IO.puts "What about in this thing???"
-
-    {:noreply, socket}
+    { :noreply, socket }
   end
 
   def handle_info({ :route, page = page }, socket) do
-    socket = socket
-             |> assign(:page, page)
-             |> live_redirect(to: Routes.live_path(socket, TastingsWeb.TastingLiveView, page))
-
-    { :noreply, socket }
+    { :noreply,
+      socket
+      |> navigate(page)
+    }
   end
 
   def handle_info(%{ event: "bottle:added", payload: %{ bottle: bottle } }, socket) do
@@ -97,5 +103,12 @@ defmodule TastingsWeb.TastingLiveView do
       current_user.username, # TODO: change this to user id
       current_user # TODO: just map things I need here
     )
+  end
+
+  defp navigate(socket, page, params \\ []) do
+    socket
+    |> assign(:page, page)
+    |> assign(:page_params, params)
+    |> live_redirect(to: Routes.live_path(socket, TastingsWeb.TastingLiveView, page, params))
   end
 end

@@ -1,6 +1,8 @@
 <div>
+  <strong><%= @tasting.name %></strong>
   <p>Joined users: <%= length(@users) %></p>
   <p><b><%= length(@tasting.bottles) %></b> Bottles</p>
 
-  <strong><%= @tasting.name %></strong>
+  <div><%= if length(@tasting.bottles) > 0, do: live_link "See bottles", to: Routes.live_path(@socket, TastingsWeb.TastingLiveView, :bottle, 1) %></div>
+
 </div>
