@@ -6,6 +6,8 @@ defmodule Tastings.Events.Tasting do
     field :join_code, :string
     field :name, :string
 
+    has_many :bottles, Tastings.Bottle
+
     timestamps()
   end
 

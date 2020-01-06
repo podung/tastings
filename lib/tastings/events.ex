@@ -116,4 +116,9 @@ defmodule Tastings.Events do
     |> Bottle.changeset(attrs)
     |> Repo.insert()
   end
+
+  def load_bottles_for_tasting(tasting) do
+    tasting
+    |> Repo.preload(:bottles)
+  end
 end

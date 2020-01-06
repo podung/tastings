@@ -28,15 +28,17 @@ defmodule TastingsWeb.TastingLiveView do
 
     if socket.connected?, do: track_presence(session)
 
-IO.inspect(session)
+    tasting = tasting_id
+              |> Tastings.Events.get_tasting!
+              |> Tastings.Events.load_bottles_for_tasting
+
     {:ok,
       assign(socket,
        current_user: current_user,
-       tasting: Tastings.Events.get_tasting!(tasting_id),
+       tasting: tasting,
        users: Presence.list_presences(topic(tasting_id)),
        page: :bottle,
-       bottle: %Bottle{ tasting_id: tasting_id },
-       bottles: [] )}
+       bottle: %Bottle{ tasting_id: tasting_id } )}
   end
 
   def handle_info(%{event: "presence_diff"}, socket = %{assigns: %{tasting: tasting}}) do
@@ -63,7 +65,6 @@ IO.inspect(session)
     # TODO: figure out why I ALWAYS end up in here.....
     # HOW COME I CAN'T INTERCEPT IT? - with the two clauses above?
     IO.puts "What about in this thing???"
-    IO.inspect(params)
 
     {:noreply, socket}
   end
@@ -77,9 +78,11 @@ IO.inspect(session)
   end
 
   def handle_info(%{ event: "bottle:added", payload: %{ bottle: bottle } }, socket) do
+    tasting = socket.assigns.tasting
+
     { :noreply,
       socket
-      |> update(:bottles, &(&1 ++ [bottle]))
+      |> assign(:tasting, %{ tasting | bottles: tasting.bottles ++ [bottle] })
     }
   end
 
