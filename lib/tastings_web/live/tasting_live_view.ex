@@ -23,20 +23,20 @@ defmodule TastingsWeb.TastingLiveView do
     """
   end
 
-  def mount(%{tasting: tasting, current_user: current_user} = session, socket) do
+  def mount(%{tasting_id: tasting_id, current_user: current_user} = session, socket) do
+    TastingsWeb.Endpoint.subscribe(topic(tasting_id))
+
     if socket.connected?, do: track_presence(session)
 
-    TastingsWeb.Endpoint.subscribe(topic(tasting.id))
-
+IO.inspect(session)
     {:ok,
-     assign(socket,
-       tasting: tasting,
+      assign(socket,
        current_user: current_user,
-       users: Presence.list_presences(topic(tasting.id)),
+       tasting: Tastings.Events.get_tasting!(tasting_id),
+       users: Presence.list_presences(topic(tasting_id)),
        page: :bottle,
-       bottle: %Bottle{ tasting_id: tasting.id },
-       bottles: []
-     )}
+       bottle: %Bottle{ tasting_id: tasting_id },
+       bottles: [] )}
   end
 
   def handle_info(%{event: "presence_diff"}, socket = %{assigns: %{tasting: tasting}}) do
@@ -87,10 +87,10 @@ defmodule TastingsWeb.TastingLiveView do
     { :noreply, socket }
   end
 
-  defp track_presence(%{ tasting: tasting, current_user: current_user }) do
+  defp track_presence(%{ tasting_id: tasting_id, current_user: current_user }) do
     Presence.track_presence(
       self(),
-      topic(tasting.id),
+      topic(tasting_id),
       current_user.username, # TODO: change this to user id
       current_user # TODO: just map things I need here
     )
