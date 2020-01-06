@@ -10,14 +10,10 @@
   <body>
     <header>
       <section class="container">
-        <nav role="navigation">
-          <ul>
-            <li><a href="https://hexdocs.pm/phoenix/overview.html">Get Started</a></li>
-          </ul>
-        </nav>
-        <a href="http://phoenixframework.org/" class="phx-logo">
-          <img src="<%= Routes.static_path(@conn, "/images/phoenix.png") %>" alt="Phoenix Framework Logo"/>
-        </a>
+        <h1>Tastings</h1>
+        <%= link to: "/" do %>
+          <img width="40%" src="<%= Routes.static_path(@conn, "/images/whiskey_glass.jpg") %>" alt="Tastings"/>
+        <% end %>
       </section>
     </header>
     <main role="main" class="container">

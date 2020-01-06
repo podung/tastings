@@ -13,5 +13,3 @@
     <%= submit "Join" %>
   </div>
 <% end %>
-
-<span><%= link "Back", to: Routes.landing_path(@conn, :index) %></span>
