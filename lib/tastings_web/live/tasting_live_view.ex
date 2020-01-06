@@ -2,6 +2,7 @@ defmodule TastingsWeb.TastingLiveView do
   use Phoenix.LiveView
   alias TastingsWeb.Presence
   alias Tastings.Bottle
+  alias Tastings.Accounts
 
   alias TastingsWeb.Router.Helpers, as: Routes
 
@@ -29,19 +30,22 @@ defmodule TastingsWeb.TastingLiveView do
     """
   end
 
-  def mount(%{tasting_id: tasting_id, current_user: current_user} = session, socket) do
+  def mount(%{tasting_id: tasting_id, current_user_id: current_user_id} = session, socket) do
     TastingsWeb.Endpoint.subscribe(topic(tasting_id))
 
-    if socket.connected?, do: track_presence(session)
 
     tasting = tasting_id
               |> Tastings.Events.get_tasting!
               |> Tastings.Events.load_bottles_for_tasting
 
+    user = Accounts.get_user!(current_user_id)
+
+    if socket.connected?, do: track_presence(tasting_id, user)
+
     {:ok,
       socket
       |> assign(
-           current_user: current_user,
+           current_user: user,
            tasting: tasting,
            users: Presence.list_presences(topic(tasting_id)),
            page: :add_bottle,
@@ -96,11 +100,11 @@ defmodule TastingsWeb.TastingLiveView do
     { :noreply, socket }
   end
 
-  defp track_presence(%{ tasting_id: tasting_id, current_user: current_user }) do
+  defp track_presence(tasting_id, current_user) do
     Presence.track_presence(
       self(),
       topic(tasting_id),
-      current_user.username, # TODO: change this to user id
+      current_user.id, # TODO: change this to user id
       current_user # TODO: just map things I need here
     )
   end

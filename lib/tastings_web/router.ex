@@ -24,9 +24,9 @@ defmodule TastingsWeb.Router do
 
 
     # TODO: get the id into the path somehow
-    live "/event/live", TastingLiveView, session: [:tasting_id, :current_user]
-    live "/event/live/:id", TastingLiveView, session: [:tasting_id, :current_user]
-    live "/event/live/:id/:bottle_index", TastingLiveView, session: [:tasting_id, :current_user]
+    live "/event/live", TastingLiveView, session: [:tasting_id, :current_user_id]
+    live "/event/live/:id", TastingLiveView, session: [:tasting_id, :current_user_id]
+    live "/event/live/:id/:bottle_index", TastingLiveView, session: [:tasting_id, :current_user_id]
   end
 
   # Other scopes may use custom stacks.
