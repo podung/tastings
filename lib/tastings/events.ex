@@ -8,6 +8,9 @@ defmodule Tastings.Events do
 
   alias Tastings.Events.Tasting
 
+  # TODO: move this or structure this stuff better
+  alias Tastings.Bottle
+
   @doc """
   Returns the list of tastings.
 
@@ -103,4 +106,14 @@ defmodule Tastings.Events do
   end
 
   def get_by_code(join_code), do: Repo.get_by!(Tasting, join_code: join_code)
+
+  def change_bottle(%Bottle{} = bottle, attrs \\ %{}) do
+    Bottle.changeset(bottle, attrs)
+  end
+
+  def create_bottle(attrs \\ %{}) do
+    %Bottle{}
+    |> Bottle.changeset(attrs)
+    |> Repo.insert()
+  end
 end

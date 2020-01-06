@@ -1,6 +1,7 @@
 defmodule TastingsWeb.TastingLiveView do
   use Phoenix.LiveView
   alias TastingsWeb.Presence
+  alias Tastings.Bottle
 
   alias TastingsWeb.Router.Helpers, as: Routes
 
@@ -12,7 +13,8 @@ defmodule TastingsWeb.TastingLiveView do
       :bottle -> live_component(assigns.socket,
                   TastingsWeb.Live.Components.Bottle,
                   id: :bottle,
-                  bottle: @bottle)
+                  bottle: assigns.bottle,
+                  tasting_id: assigns.tasting.id)
       _ -> TastingsWeb.LiveEventsView.render("show.html", assigns)
     end
 
@@ -32,7 +34,8 @@ defmodule TastingsWeb.TastingLiveView do
        current_user: current_user,
        users: Presence.list_presences(topic(tasting.id)),
        page: :bottle,
-       bottle: nil
+       bottle: %Bottle{ tasting_id: tasting.id },
+       bottles: []
      )}
   end
 
@@ -58,11 +61,11 @@ defmodule TastingsWeb.TastingLiveView do
 
   def handle_params(params, _uri, socket) do
     # TODO: figure out why I ALWAYS end up in here.....
+    # HOW COME I CAN'T INTERCEPT IT? - with the two clauses above?
     IO.puts "What about in this thing???"
-IO.inspect(params)
+    IO.inspect(params)
 
     {:noreply, socket}
-    #{ :noreply, live_redirect(socket, to: TastingsWeb.Router.Helpers.live_path(socket, TastingsWeb.TastingLiveView) ) }
   end
 
   def handle_info({ :route, page = page }, socket) do
@@ -70,6 +73,17 @@ IO.inspect(params)
              |> assign(:page, page)
              |> live_redirect(to: Routes.live_path(socket, TastingsWeb.TastingLiveView, page))
 
+    { :noreply, socket }
+  end
+
+  def handle_info(%{ event: "bottle:added", payload: %{ bottle: bottle } }, socket) do
+    { :noreply,
+      socket
+      |> update(:bottles, &(&1 ++ [bottle]))
+    }
+  end
+
+  def handle_info(msg, socket) do
     { :noreply, socket }
   end
 
