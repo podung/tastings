@@ -8,5 +8,6 @@ defmodule Tastings.Repo.Migrations.CreateUsers do
       timestamps()
     end
 
+    create index("users", [:name], unique: true)
   end
 end

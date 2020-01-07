@@ -14,6 +14,5 @@ defmodule Tastings.Repo.Migrations.CreateBottles do
     end
 
     create index(:bottles, [:tasting_id])
-    create index("users", [:name], unique: true)
   end
 end
