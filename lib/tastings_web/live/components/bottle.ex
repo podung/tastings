@@ -7,7 +7,6 @@ defmodule TastingsWeb.Live.Components.Bottle do
   defp topic(tasting_id), do: "tasting:#{tasting_id}"
 
   def render(assigns) do
-
     ~L"""
       <h2><%= @bottle.name %></h2>
       <small><%= "(Bottle #{ assigns.index } of #{ assigns.bottle_count })" %></small>
@@ -15,7 +14,7 @@ defmodule TastingsWeb.Live.Components.Bottle do
       <%= if assigns.bottle.presented do %>
         <p>This bottle has been presented</p>
       <% else %>
-        <p> NOPE </p>
+        <p>Waiting for host to present</p>
       <% end %>
 
       <%= if assigns.index > 1, do: live_link("<", to: Routes.live_path(@socket, TastingsWeb.TastingLiveView, :bottle, assigns.index - 1)) %>
