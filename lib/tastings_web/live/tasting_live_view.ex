@@ -10,18 +10,26 @@ defmodule TastingsWeb.TastingLiveView do
 
   # TODO: can I redirect from the render - to change the path?
   def render(assigns) do
+        IO.inspect assigns.current_user.name
+        IO.puts "The value out here: #{assigns.current_user.name == "Joe"}"
+
     page = case assigns.page do
       :add_bottle -> live_component(assigns.socket,
                        TastingsWeb.Live.Components.AddBottle,
                        id: :add_bottle, bottle: assigns.bottle,
                        tasting_id: assigns.tasting.id)
+
       :bottle -> live_component(
                    assigns.socket,
                    TastingsWeb.Live.Components.Bottle,
                    id: :bottle,
                    tasting: assigns.tasting,
                    index: assigns.page_params[:index],
-                   bottle_count: length(assigns.tasting.bottles))
+                   bottle_count: length(assigns.tasting.bottles),
+                   is_host: assigns.current_user.name == "Joe",
+                   active_bottle_id: assigns.tasting.active_bottle_id)
+
+
       _ -> TastingsWeb.LiveEventsView.render("show.html", assigns)
     end
 
@@ -32,7 +40,6 @@ defmodule TastingsWeb.TastingLiveView do
 
   def mount(%{tasting_id: tasting_id, current_user_id: current_user_id} = session, socket) do
     TastingsWeb.Endpoint.subscribe(topic(tasting_id))
-
 
     tasting = tasting_id
               |> Tastings.Events.get_tasting!
@@ -50,7 +57,7 @@ defmodule TastingsWeb.TastingLiveView do
            users: Presence.list_presences(topic(tasting_id)),
            page: :add_bottle,
            bottle: %Bottle{ tasting_id: tasting_id },
-           bottle_count: length(tasting.bottles)
+           bottle_count: length(tasting.bottles),
       )}
   end
 
@@ -62,13 +69,6 @@ defmodule TastingsWeb.TastingLiveView do
   end
 
   def handle_params(%{ "id" => "bottle", "bottle_index" => index } = params, uri, socket) do
-    # TODO: figure out why I never end up in here.....
-
-    IO.puts "((((((((((((((((((("
-    IO.inspect params
-    IO.puts "((((((((((((((((((("
-
-    # TODO: assign bottle and index, but do not redirect
     { :noreply,
       socket
       |> assign(:page, :bottle)
@@ -93,6 +93,25 @@ defmodule TastingsWeb.TastingLiveView do
     { :noreply,
       socket
       |> assign(:tasting, %{ tasting | bottles: tasting.bottles ++ [bottle] })
+    }
+  end
+
+  def handle_info(%{ event: "bottle:tasting", payload: %{ bottle: bottle } }, socket) do
+    tasting = socket.assigns.tasting
+
+    # TODO: find the bottle that is being tasted, and mark presented as true
+    tasting.bottles
+    index = Enum.find_index(tasting.bottles, fn b -> b.id == bottle.id end)
+
+    tasting = %{ tasting |
+      bottles: List.update_at(tasting.bottles, index, fn b -> %{ b | presented: true } end),
+      active_bottle_id: bottle.id
+    }
+
+    { :noreply,
+      socket
+      |> assign(:tasting, tasting)
+      |> assign(:active_bottle_id, bottle.id)
     }
   end
 

@@ -9,6 +9,7 @@ defmodule Tastings.Bottle do
     field :distillery, :string
     field :proof, :integer
     field :tasting_id, :id
+    field :presented, :boolean
 
     timestamps()
   end
@@ -16,7 +17,7 @@ defmodule Tastings.Bottle do
   @doc false
   def changeset(bottles, attrs) do
     bottles
-    |> cast(attrs, [:name, :distillery, :age, :proof, :blurb, :tasting_id])
+    |> cast(attrs, [:name, :distillery, :age, :proof, :blurb, :tasting_id, :presented])
     |> validate_required([:name])
     |> validate_required([:tasting_id])
     |> validate_number(:age, greater_than: 0, less_than: 100)

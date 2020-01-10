@@ -5,6 +5,7 @@ defmodule Tastings.Events do
 
   import Ecto.Query, warn: false
   alias Tastings.Repo
+  alias Ecto.Multi
 
   alias Tastings.Events.Tasting
 
@@ -120,5 +121,14 @@ defmodule Tastings.Events do
   def load_bottles_for_tasting(tasting) do
     tasting
     |> Repo.preload(:bottles)
+  end
+
+  def taste_bottle(%Bottle{} = bottle) do
+    tasting = get_tasting!(bottle.tasting_id)
+
+    Multi.new()
+    |> Multi.update(:bottle, Bottle.changeset(bottle, %{ presented: true })) #TODO: question?  Does this only try to set the presented value, or try to set all the values?
+    |> Multi.update(:tasting, Tasting.changeset(tasting, %{ active_bottle_id: bottle.id }))
+    |> Repo.transaction
   end
 end

@@ -5,6 +5,7 @@ defmodule Tastings.Events.Tasting do
   schema "tastings" do
     field :join_code, :string
     field :name, :string
+    field :active_bottle_id, :integer
 
     has_many :bottles, Tastings.Bottle
 
@@ -14,7 +15,7 @@ defmodule Tastings.Events.Tasting do
   @doc false
   def changeset(tasting, attrs) do
     tasting
-    |> cast(attrs, [:name, :join_code])
+    |> cast(attrs, [:name, :join_code, :active_bottle_id])
     |> validate_required([:name, :join_code])
   end
 end
